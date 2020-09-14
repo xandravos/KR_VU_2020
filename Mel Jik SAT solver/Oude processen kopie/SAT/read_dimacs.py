@@ -1,6 +1,5 @@
 import mxklabs.dimacs
 
-
 def read_dimacs(filename):
     try:
         # Read the DIMACS file

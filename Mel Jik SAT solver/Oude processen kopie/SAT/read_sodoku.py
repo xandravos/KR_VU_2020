@@ -49,9 +49,5 @@ def write_sodoku_dimac(sodoku_number, sodoku_size, dimac_list):
                 f.write(clause)
         f.close()
 
-
-
-
-
 if __name__ == "__main__":
     main()
