@@ -47,7 +47,6 @@ class SAT_Solver():
             self.splits += 1
             good_values.add(split_value)
 
-            # back_up_list = copy.deepcopy(list_clauses)
             solution = self.dp(new_list_clauses(list_clauses, split_value), good_values, heuristic)
             if not solution[0]:
                 self.backtracks += 1
@@ -62,35 +61,17 @@ class SAT_Solver():
             return "NSF"
 
 def new_list_clauses(list_clauses, update_value):
-    # for clause in list_clauses:
-    #     if split_value in clause:
-    #         list_clauses.remove(clause)
-    # for i, clause in enumerate([*list_clauses]):
-    #     clause_list = []
-    #     for literal in clause:
-    #         if not -split_value is literal:
-    #             clause_list.append(literal)
-    #     list_clauses[i] = clause_list
-    # if [] in list_clauses:
-    #     return -1
-    # return list_clauses
     if update_value == 0 or update_value == None:
         return list_clauses
-    list_clauses = [clause for clause in list_clauses if not update_value in clause]
+    for clause in list_clauses:
+        if update_value in clause:
+            list_clauses.remove(clause)
     for i, clause in enumerate([*list_clauses]):
         clause_list = [literal for literal in clause if -update_value != literal]
         list_clauses[i] = clause_list
     if [] in list_clauses:
         return -1
     return list_clauses
-
-#
-# def tautology_check(clause_list):
-#     for clause in clause_list:
-#         for literal in clause:
-#             if -literal in clause:
-#                 clause_list.remove(clause)
-#     return clause_list
 
 def find_pures(list_clauses):
     if list_clauses == -1:
@@ -103,7 +84,6 @@ def find_pures(list_clauses):
         if not -literal in all_literals:
             pure_literals.append(literal)
     return list(pure_literals)
-
 
 def find_units(list_clauses):
     units = []
@@ -173,7 +153,7 @@ def random_heuristic(list_clauses):
     random_lit = random_clause[random_int]
     return random_lit
 
-def DLCS(clause_list):
+def DLCS(list_clauses):
     list_literals = make_list_literals(list_clauses)
     list_literals.sort()
     pos_list, neg_list, pos_neg_list = counter_pos_neg(list_clauses, list_literals)
@@ -195,7 +175,6 @@ def MOM(list_clauses):
     for literal in literals:
         f = 0
         fn = 0
-        # number of occurences of literal in the smallest non-satisfiable clauses
         for clause in min_len_clauses:
             if literal in clause:
                 f = f + 1
