@@ -8,98 +8,120 @@ class SAT_Solver():
     def __init__(self):
         self.splits = 0
         self.backtracks = 0
-# Davis Putnam algorithm based on certain heuristic that determines how to split
 
-    def dp(self, list_clauses, variable_values, strategy):
-        # print("Splits:", self.splits)
+    def dp(self, list_clauses, good_values, heuristic):
         if self.splits < 1000:
-            variable_values = copy.deepcopy(variable_values)
-            # print(variable_values)
-
+            good_values = copy.deepcopy(good_values)
             if list_clauses == -1:
-                # print("wanneer gebeurt dit dan")
                 return [None, None, self.splits, self.backtracks]
-                return None
             elif len(list_clauses) == 0:
-                # print("en wanneer dit")
-                answer_all = list(variable_values)
-                answer_pos = [var for var in answer_all if var > 0]
-                answer = [answer_pos, answer_all, self.splits, self.backtracks]
-                return answer
+                all_values = list(good_values)
+                pos_values = []
+                for variable in all_values:
+                    if variable > 0:
+                        pos_values.append(variable)
+                return [pos_values, all_values, self.splits, self.backtracks]
 
-            advance = True
-            while advance == True:
-                advance = False
-                units = find_unit_clauses(list_clauses)
-                pure_literals = find_pure_literals(list_clauses)
-                literals = units + pure_literals
+            continuing = True
+            while continuing == True:
+                continuing = False
+                units = find_units(list_clauses)
+                pures = find_pures(list_clauses)
+                literals = units + pures
                 for literal in literals:
-                    advance = True
-                    list_clauses = update_clause_list(list_clauses, literal)
-                    variable_values.add(literal)
+                    continuing = True
+                    list_clauses = new_list_clauses(list_clauses, literal)
+                    good_values.add(literal)
                     if list_clauses == -1:
-                        variable_values.remove(literal)
+                        good_values.remove(literal)
                         return [None, None, self.splits, self.backtracks]
-                        return None
                     elif len(list_clauses) == 0:
-                        answer_all = list(variable_values)
-                        answer_pos = [var for var in answer_all if var > 0]
-                        answer = [answer_pos, answer_all, self.splits, self.backtracks]
-                        return answer
+                        all_values = list(good_values)
+                        pos_values = []
+                        for variable in all_values:
+                            if variable > 0:
+                                pos_values.append(variable)
+                        return [pos_values, all_values, self.splits, self.backtracks]
 
-            split_value = split(list_clauses, strategy)
+            split_value = split(list_clauses, heuristic)
             self.splits += 1
+            good_values.add(split_value)
 
-            variable_values.add(split_value)
-            solution = self.dp(update_clause_list(list_clauses, split_value), variable_values, strategy)
-
+            # back_up_list = copy.deepcopy(list_clauses)
+            solution = self.dp(new_list_clauses(list_clauses, split_value), good_values, heuristic)
             if not solution[0]:
                 self.backtracks += 1
-                variable_values.remove(split_value)
-                variable_values.add(-split_value)
-                solution = self.dp(update_clause_list(list_clauses, -split_value), variable_values, strategy)
+                good_values.remove(split_value)
+                good_values.add(-split_value)
+                solution = self.dp(new_list_clauses(list_clauses, -split_value), good_values, heuristic)
             return solution
 
         else:
-            print("NO SOLUTION FOUND")
-            print("Splits:", self.splits)
-            print("Backtracks:", self.backtracks)
+            print("The maximum number of splits is reached. The sudoku is not solved.")
+            print("Splits: ", self.splits, "\nBacktracks: ", self.backtracks)
             return "NSF"
 
-def update_clause_list(list_clauses, value):
-    if value is None or value == 0:
+def new_list_clauses(list_clauses, update_value):
+    # for clause in list_clauses:
+    #     if split_value in clause:
+    #         list_clauses.remove(clause)
+    # for i, clause in enumerate([*list_clauses]):
+    #     clause_list = []
+    #     for literal in clause:
+    #         if not -split_value is literal:
+    #             clause_list.append(literal)
+    #     list_clauses[i] = clause_list
+    # if [] in list_clauses:
+    #     return -1
+    # return list_clauses
+    if update_value == 0 or update_value == None:
         return list_clauses
-    list_clauses = [clause for clause in list_clauses if value not in clause]
+    list_clauses = [clause for clause in list_clauses if not update_value in clause]
     for i, clause in enumerate([*list_clauses]):
-        clause = [literal for literal in clause if -value != literal]
-        list_clauses[i] = clause
+        clause_list = [literal for literal in clause if -update_value != literal]
+        list_clauses[i] = clause_list
     if [] in list_clauses:
         return -1
     return list_clauses
 
-def find_pure_literals(list_clauses):
+#
+# def tautology_check(clause_list):
+#     for clause in clause_list:
+#         for literal in clause:
+#             if -literal in clause:
+#                 clause_list.remove(clause)
+#     return clause_list
+
+def find_pures(list_clauses):
     if list_clauses == -1:
         return []
     all_literals = []
     for clause in list_clauses:
         all_literals += clause
-    pure_literals = set([literal for literal in all_literals if -literal not in all_literals])
+    pure_literals = []
+    for literal in all_literals:
+        if not -literal in all_literals:
+            pure_literals.append(literal)
     return list(pure_literals)
 
 
-def find_unit_clauses(list_clauses):
+def find_units(list_clauses):
+    units = []
     if list_clauses == -1:
         return []
-    units = [clause[0] for clause in list_clauses if len(clause) == 1]
+    for clause in list_clauses:
+        if len(clause) == 1:
+            units.append(clause[0])
     return units
 
 def make_list_literals(list_clauses):
-    literals = []
+    all_lit = []
     for clause in list_clauses:
-        for literal in clause:
-            if abs(literal) not in literals:
-                literals.append(abs(literal))
-    return literals
+        for lit in clause:
+            abs_lit = abs(lit)
+            if abs_lit not in all_lit:
+                all_lit.append(abs_lit)
+    return all_lit
 
 def minimum_size_clauses(list_clauses):
     min_len_clauses = []
@@ -130,29 +152,28 @@ def counter_pos_neg(list_clauses, list_literals):
         neg_list.append(neg)
         pos_neg = pos + neg
         pos_neg_list.append(pos_neg)
-
     return pos_list, neg_list, pos_neg_list
 
-def split(list_clauses, strategy):
-    if strategy == "Random":
-        return random_strategy(list_clauses)
-    if strategy == "DLCS":
+def split(list_clauses, heuristic):
+    if heuristic == "Random":
+        return random_heuristic(list_clauses)
+    if heuristic == "DLCS":
         return DLCS(list_clauses)
-    if strategy == "MOM":
+    if heuristic == "MOM":
         return MOM(list_clauses)
-    if strategy == "JW_two_sided":
+    if heuristic == "JW_two_sided":
         return JW_two_sided(list_clauses)
 
-def random_strategy(list_clauses):
+def random_heuristic(list_clauses):
     len_clauses_list = len(list_clauses)
     random_int = random.randint(0, len_clauses_list - 1)
     random_clause = list_clauses[random_int]
     len_random_clause = len(random_clause)
-    random_int = random.randits(0, len_random_clause - 1)
+    random_int = random.randint(0, len_random_clause - 1)
     random_lit = random_clause[random_int]
     return random_lit
 
-def DLCS(list_clauses):
+def DLCS(clause_list):
     list_literals = make_list_literals(list_clauses)
     list_literals.sort()
     pos_list, neg_list, pos_neg_list = counter_pos_neg(list_clauses, list_literals)
@@ -164,6 +185,7 @@ def DLCS(list_clauses):
         return list_literals[max_index]
     else:
         return -(list_literals[max_index])
+
 
 def MOM(list_clauses):
     min_len_clauses = minimum_size_clauses(list_clauses)
