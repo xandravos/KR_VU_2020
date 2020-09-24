@@ -9,18 +9,15 @@ class SAT_solver():
         self.splits = 0
         self.backtracks = 0
 
-    def dp(self, list_clauses, good_values, heuristic):
+    def dpll(self, l_clauses, good_values, heuristic):
         if self.splits < 1000:
+            list_clauses = l_clauses
             good_values = copy.deepcopy(good_values)
             if list_clauses == -1:
-                return [None, None, self.splits, self.backtracks]
+                return None
             elif len(list_clauses) == 0:
                 all_values = list(good_values)
-                pos_values = []
-                for variable in all_values:
-                    if variable > 0:
-                        pos_values.append(variable)
-                return [pos_values, all_values, self.splits, self.backtracks]
+                return all_values
 
             continuing = True
             while continuing == True:
@@ -28,47 +25,41 @@ class SAT_solver():
                 units = find_units(list_clauses)
                 pures = find_pures(list_clauses)
                 literals = units + pures
-                for literal in literals:
+                for lit in literals:
                     continuing = True
-                    list_clauses = new_list_clauses(list_clauses, literal)
-                    good_values.add(literal)
+                    list_clauses = new_list_clauses(list_clauses, lit)
+                    good_values.add(lit)
                     if list_clauses == -1:
-                        good_values.remove(literal)
-                        return [None, None, self.splits, self.backtracks]
+                        good_values.remove(lit)
+                        return None
                     elif len(list_clauses) == 0:
                         all_values = list(good_values)
-                        pos_values = []
-                        for variable in all_values:
-                            if variable > 0:
-                                pos_values.append(variable)
-                        return [pos_values, all_values, self.splits, self.backtracks]
+                        return all_values
 
-            split_value = split(list_clauses, heuristic)
+            split_value = get_split_value(list_clauses, heuristic)
             self.splits += 1
-            good_values.add(split_value)
 
-            solution = self.dp(new_list_clauses(list_clauses, split_value), good_values, heuristic)
-            if not solution[0]:
+            good_values.add(split_value)
+            solution = self.dpll(new_list_clauses(list_clauses, split_value), good_values, heuristic)
+            if solution == None:
                 self.backtracks += 1
                 good_values.remove(split_value)
                 good_values.add(-split_value)
-                solution = self.dp(new_list_clauses(list_clauses, -split_value), good_values, heuristic)
+                list_clauses = new_list_clauses(list_clauses, -split_value)
+                solution = self.dpll(list_clauses, good_values, heuristic)
             return solution
-
         else:
             print("The maximum number of splits is reached. The sudoku is not solved.")
             print("Splits: ", self.splits, "\nBacktracks: ", self.backtracks)
             return "NSF"
 
 def new_list_clauses(list_clauses, update_value):
-    if update_value == 0 or update_value == None:
+    if update_value is None or update_value == 0:
         return list_clauses
-    for clause in list_clauses:
-        if update_value in clause:
-            list_clauses.remove(clause)
+    list_clauses = [clause for clause in list_clauses if update_value not in clause]
     for i, clause in enumerate([*list_clauses]):
-        clause_list = [literal for literal in clause if -update_value != literal]
-        list_clauses[i] = clause_list
+        clause = [literal for literal in clause if -update_value != literal]
+        list_clauses[i] = clause
     if [] in list_clauses:
         return -1
     return list_clauses
@@ -134,7 +125,7 @@ def counter_pos_neg(list_clauses, list_literals):
         pos_neg_list.append(pos_neg)
     return pos_list, neg_list, pos_neg_list
 
-def split(list_clauses, heuristic):
+def get_split_value(list_clauses, heuristic):
     if heuristic == "Random":
         return random_heuristic(list_clauses)
     if heuristic == "DLCS":

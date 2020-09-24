@@ -25,7 +25,7 @@ repository because they are not used when running the final code.
 To run the SAT solver for a regular Sudoku, type the following command in your
 terminal of choice:
 
-<pre><code>python SAT.py Sn sudoku9x9_1.txt</code></pre>
+<pre><code>python SAT.py Sn sudoku9x9_1</code></pre>
 
 With this command, regular Sudoku 1 is used as input. There are 985 regular
 Sudokus so the number that says 1 in the command above can vary from
@@ -33,7 +33,7 @@ Sudokus so the number that says 1 in the command above can vary from
 <br>
 If you want to run a SudokuX file, use:
 
-<pre><code>python SAT.py Sn sudokux9x9_1.txt</code></pre>
+<pre><code>python SAT.py Sn sudokux9x9_1</code></pre>
 
 Since there are 15 SudokuX files, the number can vary from 1 to 15.
 The "n" should be a number from 1 to 4, which corresponds with the following

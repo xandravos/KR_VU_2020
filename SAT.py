@@ -36,11 +36,13 @@ def main():
             print(e)
             sys.exit(1)
 
-        sat_solver = SAT_Solver()
-        sudoku_solution = sat_solver.dp(list_clauses, set(), strategy)
+        sat_solver = SAT_solver()
+        # list_clauses = new_list_clauses(list_clauses, None)
+        sudoku_solution = sat_solver.dpll(list_clauses, set(), strategy)
+        print(sudoku_solution)
         if sudoku_solution != "NSF":
-            print(f"Sudoku solved with {sat_solver.splits} splits")
-            print(f"Sudoku solved with {sat_solver.backtracks} backtracks")
+            print(f"Sudoku solved with {sat_solver.splits} splits"
+            f" and {sat_solver.backtracks} backtracks")
             make_output_file(sudoku_solution, strategy, filename)
 
 if __name__ == "__main__":
