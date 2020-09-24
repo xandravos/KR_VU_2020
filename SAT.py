@@ -1,5 +1,5 @@
 import sys
-from sat_solver import SAT_Solver
+from sat_solver import SAT_solver
 import mxklabs.dimacs
 from sat_solver import *
 from make_output_file import *
@@ -26,7 +26,7 @@ def main():
             sys.exit(1)
         strategy = strategies[strategy - 1]
         filename = sys.argv[2]
-        print(f"SAT Solver using the {strategy} heuristic started...")
+        print(f"SAT solver using the {strategy} heuristic started...")
 
         filepath = f"dimacs_sudokus/{filename}"
         try:

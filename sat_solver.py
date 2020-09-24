@@ -4,7 +4,7 @@ import sys
 
 sys.setrecursionlimit(10000)
 
-class SAT_Solver():
+class SAT_solver():
     def __init__(self):
         self.splits = 0
         self.backtracks = 0

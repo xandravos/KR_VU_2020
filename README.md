@@ -1,4 +1,4 @@
-# KR_VU_2020 SAT Solver
+# KR_VU_2020 SAT solver
 This is the repository for the SAT solver for the 2020 course Knowledge
 Representation at the Vrije Universiteit Amsterdam. The SAT solver is built by
 Laura Brongers, Ravi Meijer, Adrian Nichici, and Xandra Vos (Group 5).
@@ -12,7 +12,7 @@ can be found in our paper.
 ## Files
 The main file is SAT.py. The files that are used by SAT.py are sat_solver.py
 and make_output_file.py. The first one runs the whole DPLL algorithm and the
-lather writes the output file when a solution is found.
+latter writes the output file when a solution is found.
 The dimacs_sudokus folder contains all the SudokuX and regular Sudoku files in
 DIMACS format. The corresponding rules are also included in the files.
 
