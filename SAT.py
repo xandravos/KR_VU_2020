@@ -37,9 +37,7 @@ def main():
             sys.exit(1)
 
         sat_solver = SAT_solver()
-        # list_clauses = new_list_clauses(list_clauses, None)
         sudoku_solution = sat_solver.dpll(list_clauses, set(), strategy)
-        print(sudoku_solution)
         if sudoku_solution != "NSF":
             print(f"Sudoku solved with {sat_solver.splits} splits"
             f" and {sat_solver.backtracks} backtracks")
